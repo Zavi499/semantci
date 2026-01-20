@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Keyword Analysis Tool</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <h1>Semantic Keyword Analyzer</h1>
+                </div>
+                <nav class="nav">
+                    <button class="nav-btn active" data-view="analyze">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                    <button class="nav-btn" data-view="batch">
+                        <i class="fas fa-layer-group"></i> Batch
+                    </button>
+                    <button class="nav-btn" data-view="history">
+                        <i class="fas fa-history"></i> History
+                    </button>
+                    <button class="nav-btn" id="clearCacheBtn">
+                        <i class="fas fa-trash"></i> Clear Cache
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Status Bar -->
+            <div class="status-bar" id="statusBar">
+                <div class="status-info">
+                    <span><i class="fas fa-server"></i> API Status: <span id="apiStatus" class="status-dot offline"></span></span>
+                    <span><i class="fas fa-database"></i> Cached: <span id="cacheCount">0</span> keywords</span>
+                </div>
+            </div>
+
+            <!-- Single Analysis View -->
+            <div class="view active" id="analyzeView">
+                <div class="analysis-section">
+                    <div class="input-section">
+                        <h2>Analyze a Keyword</h2>
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                id="keywordInput"
+                                class="keyword-input"
+                                placeholder="Enter a keyword (e.g., 'python programming', 'machine learning')"
+                                autocomplete="off"
+                            >
+                            <button class="btn btn-primary" id="analyzeBtn">
+                                <i class="fas fa-search"></i> Analyze
+                            </button>
+                        </div>
+                        <div class="quick-examples">
+                            <span>Try: </span>
+                            <button class="example-btn" data-keyword="python programming">Python</button>
+                            <button class="example-btn" data-keyword="react framework">React</button>
+                            <button class="example-btn" data-keyword="machine learning">ML</button>
+                            <button class="example-btn" data-keyword="docker containers">Docker</button>
+                            <button class="example-btn" data-keyword="seo optimization">SEO</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing keyword...</p>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="error-message" id="errorMessage"></div>
+
+                    <!-- Results Container -->
+                    <div class="results-container" id="resultsContainer">
+                        <!-- Results will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Analysis View -->
+            <div class="view" id="batchView">
+                <div class="batch-section">
+                    <h2>Batch Keyword Analysis</h2>
+                    <div class="batch-input-group">
+                        <textarea
+                            id="batchKeywordsInput"
+                            class="batch-textarea"
+                            placeholder="Enter keywords (one per line, max 100)&#10;&#10;Example:&#10;python programming&#10;react framework&#10;machine learning&#10;docker containers&#10;seo optimization"
+                            rows="10"
+                        ></textarea>
+                        <div class="batch-controls">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="parallelCheckbox" checked>
+                                <span>Process in parallel</span>
+                            </label>
+                            <button class="btn btn-primary" id="batchAnalyzeBtn">
+                                <i class="fas fa-layer-group"></i> Analyze Batch
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Batch Loading -->
+                    <div class="loading" id="batchLoading">
+                        <div class="spinner"></div>
+                        <p>Processing batch...</p>
+                    </div>
+
+                    <!-- Batch Results -->
+                    <div class="batch-results-container" id="batchResultsContainer"></div>
+                </div>
+            </div>
+
+            <!-- History View -->
+            <div class="view" id="historyView">
+                <div class="history-section">
+                    <h2>Analysis History</h2>
+                    <div class="history-list" id="historyList">
+                        <p class="empty-state">No analysis history yet. Start analyzing keywords!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Semantic Keyword Analysis Tool | Powered by FastAPI & spaCy</p>
+        </div>
+    </footer>
+
+    <!-- Result Modal Template -->
+    <template id="resultTemplate">
+        <div class="result-card">
+            <!-- Overview Section -->
+            <div class="result-section overview-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-info-circle"></i> Overview</h3>
+                    <button class="export-btn" data-export="json">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                </div>
+                <div class="overview-grid">
+                    <div class="overview-item">
+                        <label>Entity</label>
+                        <span class="entity-value"></span>
+                    </div>
+                    <div class="overview-item">
+                        <label>Type</label>
+                        <span class="entity-type-value"></span>
+                    </div>
+                    <div class="overview-item">
+                        <label>Topic</label>
+                        <span class="topic-value"></span>
+                    </div>
+                    <div class="overview-item">
+                        <label>Search Intent</label>
+                        <span class="intent-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scores Section -->
+            <div class="result-section scores-section">
+                <h3><i class="fas fa-chart-bar"></i> Scores</h3>
+                <div class="scores-grid">
+                    <div class="score-card">
+                        <div class="score-label">Salience</div>
+                        <div class="score-value salience-score"></div>
+                        <div class="score-bar">
+                            <div class="score-fill salience-fill"></div>
+                        </div>
+                    </div>
+                    <div class="score-card">
+                        <div class="score-label">Authority</div>
+                        <div class="score-value authority-score"></div>
+                        <div class="score-bar">
+                            <div class="score-fill authority-fill"></div>
+                        </div>
+                    </div>
+                    <div class="score-card">
+                        <div class="score-label">Confidence</div>
+                        <div class="score-value confidence-score"></div>
+                        <div class="score-bar">
+                            <div class="score-fill confidence-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs for detailed info -->
+            <div class="result-section">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="attributes">Attributes</button>
+                    <button class="tab-btn" data-tab="semantic">Semantic</button>
+                    <button class="tab-btn" data-tab="relationships">Relationships</button>
+                    <button class="tab-btn" data-tab="graph">Knowledge Graph</button>
+                    <button class="tab-btn" data-tab="taxonomy">Taxonomy</button>
+                    <button class="tab-btn" data-tab="schema">Schema</button>
+                </div>
+
+                <div class="tab-content active" data-content="attributes">
+                    <div class="attributes-list"></div>
+                </div>
+
+                <div class="tab-content" data-content="semantic">
+                    <div class="semantic-content">
+                        <div class="semantic-item">
+                            <h4>Context</h4>
+                            <p class="context-text"></p>
+                        </div>
+                        <div class="semantic-item">
+                            <h4>Semantic Relevance</h4>
+                            <div class="tag-list semantic-tags"></div>
+                        </div>
+                        <div class="semantic-item">
+                            <h4>Topic Cluster</h4>
+                            <div class="tag-list topic-cluster-tags"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-content="relationships">
+                    <div class="relationships-list"></div>
+                </div>
+
+                <div class="tab-content" data-content="graph">
+                    <div class="graph-stats"></div>
+                    <div class="graph-visualization" id="graphViz"></div>
+                </div>
+
+                <div class="tab-content" data-content="taxonomy">
+                    <div class="taxonomy-tree"></div>
+                    <div class="ontology-section">
+                        <h4>Ontology</h4>
+                        <div class="ontology-content"></div>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-content="schema">
+                    <pre class="schema-code"></pre>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

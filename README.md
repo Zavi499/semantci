@@ -4,6 +4,7 @@ A comprehensive, production-ready keyword analysis engine that extracts structur
 
 ## Features
 
+### Backend
 - **Entity Extraction**: Identifies core entities, types, attributes, and relationships
 - **Semantic Analysis**: Detects search intent, context, and semantic relevance
 - **Knowledge Graph**: Constructs graph representations with nodes and edges
@@ -13,6 +14,15 @@ A comprehensive, production-ready keyword analysis engine that extracts structur
 - **RESTful API**: FastAPI-powered endpoints with automatic documentation
 - **Caching**: Built-in caching for improved performance
 - **Confidence Scores**: Provides confidence metrics for each analysis component
+
+### Frontend (NEW!)
+- **Modern Web Interface**: Beautiful, responsive UI for keyword analysis
+- **Interactive Visualizations**: Knowledge graph visualization with vis.js
+- **Real-time Analysis**: Instant results with loading states
+- **Batch Processing UI**: Analyze multiple keywords with visual feedback
+- **Analysis History**: Track and revisit previous analyses
+- **Export Functionality**: Download results as JSON
+- **Mobile Responsive**: Works on all devices
 
 ## Technology Stack
 
@@ -64,19 +74,25 @@ python -m spacy download en_core_web_sm
 
 ## Running the Application
 
-### Option 1: Run API Server
+### Option 1: Run with Web Interface (Recommended!)
 
-Start the FastAPI server:
+Start the FastAPI server to access both the API and web interface:
 
 ```bash
 # From the project root directory
 python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at:
-- **API**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+Then open your browser to:
+- **🌐 Web Interface**: http://localhost:8000 (Beautiful UI for keyword analysis!)
+- **📚 API Docs**: http://localhost:8000/docs (Interactive API documentation)
+- **📖 ReDoc**: http://localhost:8000/redoc (Alternative API docs)
+
+The web interface provides:
+- Single keyword analysis with rich visualizations
+- Batch processing with progress tracking
+- Interactive knowledge graph visualization
+- Analysis history and export functionality
 
 ### Option 2: Use Python Module Directly
 
@@ -270,17 +286,26 @@ semantci/
 │   └── scorer.py                 # Scoring algorithms
 ├── api/                          # FastAPI application
 │   ├── __init__.py
-│   └── main.py                   # API endpoints
+│   └── main.py                   # API endpoints + static file serving
+├── frontend/                     # Web interface (NEW!)
+│   ├── index.html                # Main HTML page
+│   ├── css/
+│   │   └── style.css             # Complete styling
+│   ├── js/
+│   │   └── app.js                # Application logic
+│   └── README.md                 # Frontend documentation
 ├── examples/                     # Example scripts
 │   ├── basic_usage.py
 │   ├── batch_processing.py
+│   ├── async_processing.py
 │   └── api_client.py
 ├── tests/                        # Test suite
 │   ├── test_analyzer.py
-│   ├── test_entity_extractor.py
 │   └── test_api.py
 ├── config/                       # Configuration files
 ├── requirements.txt              # Python dependencies
+├── run_api.sh                    # Quick start script (Linux/Mac)
+├── run_api.bat                   # Quick start script (Windows)
 └── README.md                     # This file
 ```
 

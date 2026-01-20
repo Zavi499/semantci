@@ -5,7 +5,8 @@ Provides endpoints for single and batch keyword analysis
 
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any, Union
 import logging
@@ -44,6 +45,12 @@ app.add_middleware(
 
 # Initialize analyzer
 analyzer = KeywordAnalyzer(use_cache=True, max_workers=4)
+
+# Mount static files for frontend
+frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+    logger.info(f"Frontend mounted at /static from {frontend_path}")
 
 
 # Request/Response Models
@@ -100,9 +107,23 @@ class HealthResponse(BaseModel):
 
 # API Endpoints
 
-@app.get("/", response_model=Dict[str, str])
+@app.get("/")
 async def root():
-    """Root endpoint with API information"""
+    """Serve the frontend application"""
+    frontend_file = os.path.join(frontend_path, 'index.html')
+    if os.path.exists(frontend_file):
+        return FileResponse(frontend_file)
+    return {
+        "message": "Semantic Keyword Analysis API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health",
+        "frontend": "/static/index.html"
+    }
+
+@app.get("/api", response_model=Dict[str, str])
+async def api_info():
+    """API information endpoint"""
     return {
         "message": "Semantic Keyword Analysis API",
         "version": "1.0.0",
